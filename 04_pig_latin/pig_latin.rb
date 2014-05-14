@@ -2,30 +2,56 @@
 #
 # Rule 2: If a word begins with a consonant sound, move it to the end of the word, and then add an "ay" sound to the end of the word.
 
-def translate(word)
-	word = word.downcase
+def translate(sent)
+	sent = sent.downcase
 	vowels = ['a', 'e', 'i', 'o', 'u']
-	wordArr = word.split('')
-	translation = ''
-	ending = ''
+	words = sent.split(' ')
+	result = []
 
-	if vowels.include? wordArr[0]
-		# starts with vowel
-		wordArr = wordArr.join
-		translation = wordArr + 'ay'
-	else
-		# starts with consonant
-		wordArr.each_with_index do |char, i|
-			if vowels.include? char
-				break
-			else
-				ending += wordArr[i]
-				translation = wordArr[i..wordArr.length]
+	words.each_with_index do |word, i|
+		translation = ''
+		qu = false
+		if vowels.include? word[0]
+			translation = word + 'ay'
+			result.push(translation)
+		else
+			word = word.split('')
+			count = 0
+			word.each_with_index do |char, index|
+				if vowels.include? char
+					# handle words that start with 'qu'
+					if char == 'u' and translation[-1] == 'q'
+						qu = true
+						translation = words[i][count + 1..words[i].length] + translation + 'uay'
+						result.push(translation)
+						next
+					end
+					break
+				else
+					# handle words with 'qu' in middle
+					if char == 'q' and word[i+1] == 'u'
+						qu = true
+						translation = words[i][count + 2..words[i].length] + 'quay'
+						result.push(translation)
+						next
+					else
+						translation += char
+					end
+					count += 1
+				end
 			end
-			translation += ending
+			# translation of consonant words without qu
+			if not qu
+				translation = words[i][count..words[i].length] + translation + 'ay'
+				result.push(translation)
+			end
 		end
+		
 	end
-	translation
+	result.join(' ')
 end
 
-puts translate("banana")
+# puts translate('apple')
+# puts translate("quiet")
+# puts translate("square")
+# puts translate("the quick brown fox")
